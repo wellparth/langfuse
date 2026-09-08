@@ -231,10 +231,14 @@ function DatasetRunsTableInternal(
   const { setScoreOptions } = props;
 
   // Filter options for the table
+  const datasetRunIdsReady =
+    Boolean(props.projectId) && Boolean(props.datasetId);
+
   const datasetRunsFilterOptionsResponse =
     api.datasets.runFilterOptions.useQuery(
       { projectId: props.projectId, datasetId: props.datasetId },
       {
+        enabled: datasetRunIdsReady,
         refetchOnMount: false,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
@@ -250,13 +254,16 @@ function DatasetRunsTableInternal(
 
   const setFilterState = useDebounce(setUserFilterState);
 
-  const runs = api.datasets.runsByDatasetId.useQuery({
-    projectId: props.projectId,
-    datasetId: props.datasetId,
-    page: paginationState.pageIndex,
-    limit: paginationState.pageSize,
-    filter: userFilterState,
-  });
+  const runs = api.datasets.runsByDatasetId.useQuery(
+    {
+      projectId: props.projectId,
+      datasetId: props.datasetId,
+      page: paginationState.pageIndex,
+      limit: paginationState.pageSize,
+      filter: userFilterState,
+    },
+    { enabled: datasetRunIdsReady },
+  );
 
   const runsMetrics = api.datasets.runsByDatasetIdMetrics.useQuery(
     {
@@ -266,7 +273,7 @@ function DatasetRunsTableInternal(
       filter: userFilterState,
     },
     {
-      enabled: runs.isSuccess,
+      enabled: datasetRunIdsReady && runs.isSuccess,
     },
   );
 

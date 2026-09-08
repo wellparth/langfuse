@@ -88,6 +88,10 @@ import { extractTransferFiles } from "@/src/components/editor/fileDropPaste";
 import { Layer } from "@/src/components/ui/layer";
 import { showSuccessToast } from "@/src/features/notifications/showSuccessToast";
 import { useDashboardDefinitionDraft } from "@/src/features/dashboard/hooks/useDashboardDefinitionDraft";
+import {
+  RouteParamsPendingFallback,
+  useReadyRouteParams,
+} from "@/src/hooks/useReadyRouteParams";
 
 // Position for a tile inserted "next to" an anchor tile: same size,
 // immediately to the right when that fits the 12-column grid, otherwise
@@ -102,10 +106,16 @@ function placementNextTo(anchor: DashboardPlacement) {
   };
 }
 
+export default function DashboardDetailPage() {
+  const route = useReadyRouteParams(["projectId", "dashboardId"]);
+  if (!route.ready) return <RouteParamsPendingFallback />;
+  return <DashboardDetail />;
+}
+
 // Controller: no widget query may fire before the session resolves the v3/v4
 // read path — an unresolved session used to read as v3 and fire a wave of
 // legacy-table queries that was thrown away once the session landed.
-export default function DashboardDetail() {
+function DashboardDetail() {
   const router = useRouter();
   const { projectId } = router.query as { projectId: string };
   const { readPath } = useReadPath();
